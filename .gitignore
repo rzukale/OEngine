@@ -1,0 +1,10 @@
+*.obj
+*.tlog
+*.idb
+*.pdb
+*.log
+*.ipch
+*.opendb
+*.ilk
+*.db
+*.suo
