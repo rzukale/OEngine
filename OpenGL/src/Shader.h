@@ -19,8 +19,10 @@ public:
 
 	// utility functions
 	std::string	LoadShaderSource(const char* Filename);
-	GLuint CompileShader(const char* Filename, GLenum type);
+	GLuint CompileShader(const char* Filename, GLenum Type);
 
 	// uniform functions
 	void SetMat4(const std::string& Name, const glm::mat4& Matrix);
+	void SetInt(const std::string& Name, int Value);
+	void SetFloat(const std::string& Name, float Value);
 };

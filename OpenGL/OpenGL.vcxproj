@@ -137,6 +137,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\io\CameraClass.cpp" />
+    <ClCompile Include="src\io\Mouse.cpp" />
+    <ClCompile Include="src\io\Keyboard.cpp" />
     <ClCompile Include="lib\stb_image.cpp" />
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\main.cpp" />
@@ -148,7 +151,14 @@
     <None Include="assets\vertex_core.glsl" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\io\CameraClass.h" />
+    <ClInclude Include="src\io\Mouse.h" />
+    <ClInclude Include="src\io\Keyboard.h" />
     <ClInclude Include="src\Shader.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\textures\fallout.png" />
+    <Image Include="assets\textures\space2.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

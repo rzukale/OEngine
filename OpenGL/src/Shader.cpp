@@ -54,13 +54,13 @@ std::string Shader::LoadShaderSource(const char* Filename)
 	return Ret;
 }
 
-GLuint Shader::CompileShader(const char* Filename, GLenum type)
+GLuint Shader::CompileShader(const char* Filename, GLenum Type)
 {
 	int Success;
 	char InfoLog[512];
 	GLuint ShaderID;
 
-	ShaderID = glCreateShader(type);
+	ShaderID = glCreateShader(Type);
 	std::string ShaderSource = LoadShaderSource(Filename);
 	const GLchar* Shader = ShaderSource.c_str();
 	glShaderSource(ShaderID, 1, &Shader, NULL);
@@ -79,4 +79,14 @@ GLuint Shader::CompileShader(const char* Filename, GLenum type)
 void Shader::SetMat4(const std::string& Name, const glm::mat4& Matrix)
 {
 	glUniformMatrix4fv(glGetUniformLocation(m_RendererID, Name.c_str()), 1, GL_FALSE, glm::value_ptr(Matrix));
+}
+
+void Shader::SetInt(const std::string& Name, int Value)
+{
+	glUniform1i(glGetUniformLocation(m_RendererID, Name.c_str()), Value);
+}
+
+void Shader::SetFloat(const std::string& Name, float Value)
+{
+	glUniform1f(glGetUniformLocation(m_RendererID, Name.c_str()), Value);
 }
