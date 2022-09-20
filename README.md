@@ -1,6 +1,6 @@
 # OpenGL Engine
 
-Exploring Cameras, Lighting, model loading and shaders in OpenGL
+Exploring Cameras, Lighting, Model loading and Shaders in OpenGL
 
 # Model loading with lighting
 ![alt text](https://github.com/rzukale/OEngine/blob/main/media/model_troll.png?raw=true)
