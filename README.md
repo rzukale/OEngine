@@ -1,2 +1,3 @@
-# cpp_opengl
-Learning openGL
+# OpenGL Engine
+
+Exploring Cameras, Lighting, model loading and shaders in OpenGL
