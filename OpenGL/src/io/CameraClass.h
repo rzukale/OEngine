@@ -34,6 +34,8 @@ public:
 	void UpdateCameraPosition(CameraDirection Direction, const float& DeltaTime);
 	void UpdateCameraZoom(const float& DeltaY);
 
+	float GetZoom();
+
 	glm::mat4 GetViewMatrix();
 
 private:

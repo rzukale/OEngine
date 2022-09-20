@@ -1,8 +1,8 @@
 #include "CameraClass.h"
 
 CameraClass::CameraClass(glm::vec3 Position)
-    : m_CameraPosition(Position), m_WorldUp(glm::vec3(0.0f, 1.0f, 0.0f)), m_Yaw(-90.0f), m_Pitch(0.0f),
-    m_Speed(2.5f), m_Zoom(45.0f), m_CameraFront(glm::vec3(0.0f, 0.0f, -1.0f))
+    : m_CameraPosition(Position), m_WorldUp(glm::vec3(0.0f, 1.0f, 0.0f)), m_Yaw(0.0f), m_Pitch(0.0f),
+    m_Speed(2.5f), m_Zoom(45.0f), m_CameraFront(glm::vec3(1.0f, 0.0f, 0.0f))
 {
     UpdateCameraVectors();
 }
@@ -66,6 +66,11 @@ void CameraClass::UpdateCameraZoom(const float& DeltaY)
     {
         m_Zoom = 45.0f;
     }
+}
+
+float CameraClass::GetZoom()
+{
+    return m_Zoom;
 }
 
 glm::mat4 CameraClass::GetViewMatrix()
