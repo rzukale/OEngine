@@ -51,16 +51,25 @@
     <ClCompile Include="src\graphics\Material.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphics\Models\Lamp.cpp">
+    <ClCompile Include="src\graphics\models\Lamp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphics\Models\Cube.cpp">
+    <ClCompile Include="src\graphics\models\Cube.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\graphics\Light.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\error.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\models\Sphere.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\physics\RigidBody.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\physics\Global.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -72,6 +81,10 @@
     <None Include="assets\models\m4a1\scene.gltf" />
     <None Include="assimp-vc143-mtd.dll" />
     <None Include="glfw3.dll" />
+    <None Include="assets\models\sphere\scene.gltf" />
+    <None Include="assets\instanced\instanced.vs" />
+    <None Include="assets\instanced\box.vs" />
+    <None Include="assets\instanced\box.fs" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\graphics\Shader.h">
@@ -98,19 +111,34 @@
     <ClInclude Include="src\graphics\Model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphics\Models\Cube.h">
+    <ClInclude Include="src\graphics\models\Cube.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\graphics\Material.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphics\Models\Lamp.h">
+    <ClInclude Include="src\graphics\models\Lamp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\graphics\Light.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\error.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\models\ModelArray.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\models\Sphere.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physics\RigidBody.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physics\Global.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\models\Box.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,29 +1,35 @@
 #include "Model.h"
+#include "../physics/Global.h"
 
 Model::Model(glm::vec3 Position, glm::vec3 Size, bool bHasTextures)
-	: m_Position(Position), m_Size(Size), m_bHasTextures(bHasTextures)
+	: m_Size(Size), m_bHasTextures(bHasTextures)
 {
+	m_RigidBody.m_Position = Position;
 }
 
 void Model::Init() { }
 
-void Model::Render(Shader& shader)
+void Model::Render(Shader& shader, float DeltaTime, bool bSetModel, bool bDoRender)
 {
-	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::translate(model, m_Position);
-	model = glm::scale(model, m_Size);
-	shader.SetMat4("model", model);
+	m_RigidBody.Update(DeltaTime);
+	if (bSetModel)
+	{
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, m_RigidBody.m_Position);
+		model = glm::scale(model, m_Size);
+		shader.SetMat4("model", model);
+	}
 	shader.SetFloat("material.shininess", 0.5f);
 
-	for (Mesh mesh : m_Meshes)
+	for (Mesh& mesh : m_Meshes)
 	{
-		mesh.Render(shader);
+		mesh.Render(shader, bDoRender);
 	}
 }
 
 void Model::Cleanup()
 {
-	for (Mesh mesh : m_Meshes)
+	for (Mesh& mesh : m_Meshes)
 	{
 		mesh.Cleanup();
 	}
@@ -72,7 +78,7 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		Vertex vertex;
 
 		// position
-		vertex.Position = glm::vec3
+		vertex.m_Position = glm::vec3
 		(
 			mesh->mVertices[i].x,
 			mesh->mVertices[i].y,
@@ -80,7 +86,7 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		);
 
 		// normal
-		vertex.Normal = glm::vec3
+		vertex.m_Normal = glm::vec3
 		(
 			mesh->mNormals[i].x,
 			mesh->mNormals[i].y,
@@ -90,7 +96,7 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		// TexCoord
 		if (mesh->mTextureCoords[0])
 		{
-			vertex.TexCoord = glm::vec2
+			vertex.m_TexCoord = glm::vec2
 			(
 				mesh->mTextureCoords[0][i].x,
 				mesh->mTextureCoords[0][i].y
@@ -98,7 +104,7 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		}
 		else
 		{
-			vertex.TexCoord = glm::vec2(0.0f);
+			vertex.m_TexCoord = glm::vec2(0.0f);
 		}
 		vertices.push_back(vertex);
 	}

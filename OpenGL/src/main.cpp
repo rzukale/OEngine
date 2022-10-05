@@ -7,6 +7,8 @@
 #include <sstream>
 #include <streambuf>
 #include <string>
+#include <vector>
+#include <stack>
 
 #include "stb/stb_image.h"
 
@@ -16,10 +18,14 @@
 
 #include "graphics/Shader.h"
 #include "graphics/Texture.h"
-#include "graphics/Models/Cube.h"
-#include "graphics/Models/Lamp.h"
+#include "graphics/models/Cube.h"
+#include "graphics/models/Lamp.h"
 #include "graphics/Model.h"
 #include "graphics/Light.h"
+#include "graphics/models/Sphere.h"
+#include "graphics/models/Box.hpp"
+
+#include "physics/Global.h"
 
 #include "io/Screen.h"
 #include "io/Mouse.h"
@@ -47,6 +53,9 @@ int ActiveCameraIndex = 0;
 float DeltaTime = 0.0f;
 float LastFrame = 0.0f;
 
+Box box;
+
+SphereArray LaunchObjects;
 
 #include <stdio.h>
 
@@ -85,7 +94,9 @@ int main()
 
 	// shaders
 	Shader shader("assets/object.vs", "assets/object.fs");
-	Shader lampShader("assets/object.vs", "assets/lamp.fs");
+	Shader lampShader("assets/instanced/instanced.vs", "assets/lamp.fs");
+	Shader launchShader("assets/instanced/instanced.vs", "assets/object.fs");
+	Shader boxShader("assets/instanced/box.vs", "assets/instanced/box.fs");
 
 	glm::vec3 cubePositions[] =
 	{
@@ -108,14 +119,35 @@ int main()
 			glm::vec3(-4.0f,  2.0f, -12.0f),
 			glm::vec3(0.0f,  0.0f, -3.0f)
 	};
+
+	glm::vec4 ambient = glm::vec4(0.05f, 0.05f, 0.05f, 1.0f);
+	glm::vec4 diffuse = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
+	glm::vec4 specular = glm::vec4(1.0f);
+
+	float k0 = 1.0f;
+	float k1 = 0.07f;
+	float k2 = 0.032f;
+
 	Lamp lamps[4];
 	for (unsigned int i = 0; i < 4; i++)
 	{
 		lamps[i] = Lamp(glm::vec3(1.0f),
-			glm::vec4(0.05f, 0.05f, 0.05f, 1.0f), glm::vec4(0.8f, 0.8f, 0.8f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
-			1.0f, 0.07f, 0.032f,
+			ambient, diffuse, specular,
+			k0, k1, k2,
 			pointLightPositions[i], glm::vec3(0.25f));
 		lamps[i].Init();
+	}
+
+	LampArray Lamps;
+	Lamps.Init();
+
+	for (unsigned int i = 0; i < 4; i++)
+	{
+		Lamps.m_LightInstances.push_back({
+			pointLightPositions[i],
+			k0, k1, k2,
+			ambient, diffuse, specular
+		});
 	}
 
 	DirectionalLight dirLight = { glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec4(0.1f, 0.1f, 0.1f, 1.0f), glm::vec4(0.4f, 0.4f, 0.4f, 1.0f), glm::vec4(0.75f, 0.75f, 0.75f, 1.0f) };
@@ -124,9 +156,10 @@ int main()
 		1.0f, 0.07f, 0.032f,
 		glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f) };
 
-	Model model(glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(0.05f), true);
-	model.LoadModel("assets/models/lotr_troll/scene.gltf");
-
+	//Model model(glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(0.05f), true);
+	//model.LoadModel("assets/models/lotr_troll/scene.gltf");
+	LaunchObjects.Init();
+	box.Init();
 
 	while (!screen.ShouldClose())
 	{
@@ -139,21 +172,28 @@ int main()
 		screen.Update();
 
 		shader.Bind();
+		launchShader.Bind();
 		//shader.Set3Float("light.Position", lamp.m_Pos);
 		shader.Set3Float("ViewPos", Cameras[ActiveCameraIndex].m_CameraPosition);
+		launchShader.Set3Float("ViewPos", Cameras[ActiveCameraIndex].m_CameraPosition);
+
 
 		dirLight.m_Direction = glm::vec3(glm::rotate(glm::mat4(1.0f), glm::radians(0.5f), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::vec4(dirLight.m_Direction, 1.0f));
 		dirLight.Render(shader);
+		dirLight.Render(launchShader);
 
 		for (int i = 0; i < 4; i++)
 		{
-			lamps[i].pointLight.Render(shader, i);
+			Lamps.m_LightInstances[i].Render(shader, i);
+			Lamps.m_LightInstances[i].Render(launchShader, i);
 		}
 		shader.SetInt("NumberOfPointlights", 4);
+		launchShader.SetInt("NumberOfPointlights", 4);
 
 		spotLight.m_Position = Cameras[ActiveCameraIndex].m_CameraPosition;
 		spotLight.m_Direction = Cameras[ActiveCameraIndex].m_CameraFront;
 		shader.SetInt("NumberOfSpotlights", 1);
+		launchShader.SetInt("NumberOfSpotlights", 1);
 
 		// create transformation for screen
 		glm::mat4 view = glm::mat4(1.0f);
@@ -165,29 +205,65 @@ int main()
 		shader.SetMat4("view", view);
 		shader.SetMat4("projection", projection);
 
-		spotLight.Render(shader, 0);
+		std::stack<int> RemovableObjects;
+		for (int i = 0; i < LaunchObjects.m_Instances.size(); i++)
+		{
+			if (glm::length(Cameras[ActiveCameraIndex].m_CameraPosition - LaunchObjects.m_Instances[i].m_Position) > 50.0f)
+			{
+				RemovableObjects.push(i);
+				continue;
+			}
+		}
 
-		model.Render(shader);
-		
+		for (int i = 0; i < RemovableObjects.size(); i++)
+		{
+			LaunchObjects.m_Instances.erase(LaunchObjects.m_Instances.begin() + RemovableObjects.top());
+			RemovableObjects.pop();
+		}
+
+
+		if (LaunchObjects.m_Instances.empty() == false)
+		{
+			launchShader.SetMat4("view", view);
+			launchShader.SetMat4("projection", projection);
+			LaunchObjects.Render(launchShader, DeltaTime);
+		}
+
+		//spotLight.Render(shader, 0);
+
+		//model.Render(shader);
+		//sphere.Render(shader, DeltaTime);
+
 		lampShader.Bind();
 		lampShader.SetMat4("view", view);
 		lampShader.SetMat4("projection", projection);
-		
-		for (int i = 0; i < 4; i++)
+		Lamps.Render(lampShader, DeltaTime);
+
+		// render boxes
+		if (box.m_Offsets.empty() == false)
 		{
-			lamps[i].Render(lampShader);
+			boxShader.Bind();
+			boxShader.SetMat4("view", view);
+			boxShader.SetMat4("projection", projection);
+			box.Render(boxShader);
 		}
+		
 		screen.NewFrame();
 	}
 
-	model.Cleanup();
-	for (int i = 0; i < 4; i++)
-	{
-		lamps[i].Cleanup();
-	}
-
+	LaunchObjects.Cleanup();
+	Lamps.Cleanup();
+	box.Cleanup();
 	glfwTerminate();
 	return EXIT_SUCCESS;
+}
+
+void LaunchItem(float DeltaTime)
+{
+	RigidBody NewBody(1.0f, Cameras[ActiveCameraIndex].m_CameraPosition);
+	NewBody.TransferEnergy(100.0f, Cameras[ActiveCameraIndex].m_CameraFront);
+	NewBody.ApplyAcceleration(Global::EnviromentalAcceleration);
+	LaunchObjects.m_Instances.push_back(NewBody);
 }
 
 void	ProcessInput(float DeltaTime)
@@ -244,6 +320,16 @@ void	ProcessInput(float DeltaTime)
 	{
 		Cameras[ActiveCameraIndex].UpdateCameraPosition(CameraDirection::DOWN, DeltaTime);
 	}
+	if (Keyboard::KeyWentDown(GLFW_KEY_F))
+	{
+		LaunchItem(DeltaTime);
+	}
+	if (Keyboard::KeyWentDown(GLFW_KEY_I))
+	{
+		box.m_Offsets.push_back(glm::vec3(box.m_Offsets.size() * 1.0f));
+		box.m_Sizes.push_back(glm::vec3(box.m_Sizes.size() * 0.5f));
+	}
+
 
 	float DeltaX = (float)Mouse::GetDeltaX();
 	float DeltaY = (float)Mouse::GetDeltaY();

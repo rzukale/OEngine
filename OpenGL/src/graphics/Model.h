@@ -13,25 +13,25 @@
 #include <assimp/postprocess.h>
 
 #include "Mesh.h"
+#include "../physics/RigidBody.h"
 
 class Model
 {
 public:
-	glm::vec3 m_Position;
+	RigidBody m_RigidBody;
 	glm::vec3 m_Size;
+	std::vector<Mesh> m_Meshes;
 
 	Model(glm::vec3 Position = glm::vec3(0.0f), glm::vec3 Size = glm::vec3(1.0f), bool bHasTextures = true);
 
 	virtual void Init();
 	void LoadModel(const std::string& filePath);
 
-	virtual void Render(Shader& shader);
+	void Render(Shader& shader, float DeltaTime, bool bSetModel = true, bool bDoRender = true);
 	void Cleanup();
 protected:
 	bool m_bHasTextures;
-	std::vector<Mesh> m_Meshes;
 	std::string m_Directory;
-
 	std::vector<Texture> m_TexturesLoaded;
 
 	void ProcessNode(aiNode* node, const aiScene* scene);

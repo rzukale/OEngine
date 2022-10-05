@@ -8,21 +8,21 @@ std::vector<Vertex> Vertex::GenList(float* Vertices, int NumberOfVertices)
 
 	for (int i = 0; i < NumberOfVertices; i++)
 	{
-		Ret[i].Position = glm::vec3
+		Ret[i].m_Position = glm::vec3
 		(
 			Vertices[i * Stride + 0],
 			Vertices[i * Stride + 1],
 			Vertices[i * Stride + 2]
 		);
 
-		Ret[i].Normal = glm::vec3
+		Ret[i].m_Normal = glm::vec3
 		(
 			Vertices[i * Stride + 3],
 			Vertices[i * Stride + 4],
 			Vertices[i * Stride + 5]
 		);
 
-		Ret[i].TexCoord = glm::vec2
+		Ret[i].m_TexCoord = glm::vec2
 		(
 			Vertices[i * Stride + 6],
 			Vertices[i * Stride + 7]
@@ -47,7 +47,7 @@ Mesh::Mesh(std::vector<Vertex> Vertices, std::vector<unsigned int> Indices, aiCo
 	Setup();
 }
 
-void Mesh::Render(Shader& shader)
+void Mesh::Render(Shader& shader, bool bDoRender)
 {
 	if (m_bNoTextures)
 	{
@@ -80,10 +80,13 @@ void Mesh::Render(Shader& shader)
 		}
 		shader.SetInt("NoTex", 0);
 	}
-	GLCall(glBindVertexArray(m_VAO));
-	GLCall(glDrawElements(GL_TRIANGLES, m_Indices.size(), GL_UNSIGNED_INT, 0));
-	GLCall(glBindVertexArray(0));
-	GLCall(glActiveTexture(GL_TEXTURE0));
+	if (bDoRender)
+	{
+		GLCall(glBindVertexArray(m_VAO));
+		GLCall(glDrawElements(GL_TRIANGLES, m_Indices.size(), GL_UNSIGNED_INT, 0));
+		GLCall(glBindVertexArray(0));
+		GLCall(glActiveTexture(GL_TEXTURE0));
+	}
 }
 
 void Mesh::Cleanup()
@@ -110,14 +113,14 @@ void Mesh::Setup()
 	// Setting Vertex Attribute pointers
 	// Vertex Position
 	GLCall(glEnableVertexAttribArray(0));
-	GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Position)));
+	GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_Position)));
 
 	GLCall(glEnableVertexAttribArray(1));
-	GLCall(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal)));
+	GLCall(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_Normal)));
 
 	// Vertex TexCoords
 	GLCall(glEnableVertexAttribArray(2));
-	GLCall(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoord)));
+	GLCall(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_TexCoord)));
 
 	GLCall(glBindVertexArray(0));
 }

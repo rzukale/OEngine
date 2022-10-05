@@ -73,4 +73,3 @@ void Cube::Init()
 
 	m_Meshes.push_back(Mesh(Vertex::GenList(Vertices, NumberOfVertices), Indices));
 }
-

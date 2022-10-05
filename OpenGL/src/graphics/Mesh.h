@@ -12,9 +12,9 @@
 
 struct Vertex
 {
-	glm::vec3 Position;
-	glm::vec3 Normal;
-	glm::vec2 TexCoord;
+	glm::vec3 m_Position;
+	glm::vec3 m_Normal;
+	glm::vec2 m_TexCoord;
 
 	static std::vector<Vertex> GenList(float* Vertices, int NumberOfVertices);
 };
@@ -33,12 +33,13 @@ public:
 	Mesh(std::vector<Vertex> Vertices, std::vector<unsigned int> Indices, std::vector<Texture> Textures = {});
 	Mesh(std::vector<Vertex> Vertices, std::vector<unsigned int> Indices, aiColor4D diffuse, aiColor4D specular);
 
-	void Render(Shader& shader);
+	void Render(Shader& shader, bool bDoRender = true);
 	void Cleanup();
 
-private:
 	unsigned int m_VAO;
 	unsigned int m_VBO, m_EBO;
+
+private:
 	bool m_bNoTextures;
 	void Setup();
 };

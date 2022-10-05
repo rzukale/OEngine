@@ -137,10 +137,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\graphics\models\Sphere.cpp" />
     <ClCompile Include="src\error.cpp" />
     <ClCompile Include="src\graphics\Light.cpp" />
-    <ClCompile Include="src\graphics\Models\Cube.cpp" />
-    <ClCompile Include="src\graphics\Models\Lamp.cpp" />
+    <ClCompile Include="src\graphics\models\Cube.cpp" />
+    <ClCompile Include="src\graphics\models\Lamp.cpp" />
     <ClCompile Include="src\graphics\Material.cpp" />
     <ClCompile Include="src\graphics\Model.cpp" />
     <ClCompile Include="src\graphics\Mesh.cpp" />
@@ -153,10 +154,16 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\graphics\Shader.cpp" />
     <ClCompile Include="src\graphics\Texture.cpp" />
+    <ClCompile Include="src\physics\Global.cpp" />
+    <ClCompile Include="src\physics\RigidBody.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="assets\instanced\box.vs" />
+    <None Include="assets\instanced\instanced.vs" />
+    <None Include="assets\instanced\box.fs" />
     <None Include="assets\models\lotr_troll\scene.gltf" />
     <None Include="assets\models\m4a1\scene.gltf" />
+    <None Include="assets\models\sphere\scene.gltf" />
     <None Include="assets\object.fs" />
     <None Include="assets\object.vs" />
     <None Include="assets\lamp.fs" />
@@ -164,11 +171,14 @@
     <None Include="glfw3.dll" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\graphics\models\Box.hpp" />
+    <ClInclude Include="src\graphics\models\Sphere.h" />
+    <ClInclude Include="src\graphics\models\ModelArray.hpp" />
     <ClInclude Include="src\error.h" />
     <ClInclude Include="src\graphics\Light.h" />
-    <ClInclude Include="src\graphics\Models\Lamp.h" />
+    <ClInclude Include="src\graphics\models\Lamp.h" />
     <ClInclude Include="src\graphics\Material.h" />
-    <ClInclude Include="src\graphics\Models\Cube.h" />
+    <ClInclude Include="src\graphics\models\Cube.h" />
     <ClInclude Include="src\graphics\Model.h" />
     <ClInclude Include="src\graphics\Mesh.h" />
     <ClInclude Include="src\io\Screen.h" />
@@ -177,6 +187,8 @@
     <ClInclude Include="src\io\Keyboard.h" />
     <ClInclude Include="src\graphics\Shader.h" />
     <ClInclude Include="src\graphics\Texture.h" />
+    <ClInclude Include="src\physics\Global.h" />
+    <ClInclude Include="src\physics\RigidBody.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\textures\fallout.png" />

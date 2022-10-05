@@ -59,7 +59,7 @@ std::string Shader::LoadShaderSource(const char* Filename)
 {
 	std::ifstream		File;
 	std::stringstream	Buf;
-	std::string			Ret = "";
+	std::string			Ret;
 
 	File.open(Filename);
 	if (File.is_open())
@@ -121,8 +121,8 @@ void Shader::SetFloat(const std::string& Name, float Value)
 
 void Shader::Set3Float(const std::string& Name, const glm::vec3& Value)
 {
-	Set3Float(Name, Value.x, Value.y, Value.z);
-	//GLCall(glUniform3f(GetUniformLocation(Name), Val.x, Val.y, Val.z));
+	//Set3Float(Name, Value.x, Value.y, Value.z);
+	GLCall(glUniform3f(GetUniformLocation(Name), Value.x, Value.y, Value.z));
 }
 
 void Shader::Set3Float(const std::string& Name, float Val1, float Val2, float Val3)
@@ -147,11 +147,11 @@ int Shader::GetUniformLocation(const std::string& name)
 	{
 		return m_UniformLocationCache[name];
 	}
-	GLCall(int location = glGetUniformLocation(m_RendererID, name.c_str()));
-	if (location == -1)
+	GLCall(int Location = glGetUniformLocation(m_RendererID, name.c_str()));
+	if (Location == -1)
 	{
 		std::cout << "Warning: uniform '" << name << "' doesn't exist!" << std::endl;
 	}
-	m_UniformLocationCache[name] = location;
-	return location;
+	m_UniformLocationCache[name] = Location;
+	return Location;
 }
