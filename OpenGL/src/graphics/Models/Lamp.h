@@ -15,7 +15,7 @@ public:
 	Lamp(glm::vec3 LightColor, glm::vec4 Ambient, glm::vec4 Diffuse, glm::vec4 Specular, float k0, float k1, float k2, glm::vec3 Pos, glm::vec3 Size);
 	~Lamp();
 
-	void Render(Shader& shader, float DeltaTime, bool bSetModel = true, bool bDoRender = true);
+	void Render(Shader& shader, float DeltaTime, Box* box, bool bSetModel = true, bool bDoRender = true);
 };
 
 class LampArray : public ModelArray<Lamp>
@@ -33,7 +33,7 @@ public:
 		ModelArray::Init();
 	}
 
-	void Render(Shader& shader, float DeltaTime)
+	void Render(Shader& shader, float DeltaTime, Box* box)
 	{
 		m_Positions.clear();
 		m_Sizes.clear();
@@ -43,6 +43,6 @@ public:
 			m_Positions.push_back(pointlight.m_Position);
 			m_Sizes.push_back(m_Model.m_Size);
 		}
-		ModelArray::Render(shader, DeltaTime, false);
+		ModelArray::Render(shader, DeltaTime, box,false);
 	}
 };

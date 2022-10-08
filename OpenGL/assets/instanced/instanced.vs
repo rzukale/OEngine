@@ -16,8 +16,7 @@ uniform mat4 projection;
 
 void main()
 {
-	vec3 Pos = vec3(aPos.x * aSize.x, aPos.y * aSize.y, aPos.z * aSize.z);
-
+	vec3 Pos = aPos * aSize;
 
 	FragPos = vec3(model * vec4(Pos + aOffset, 1.0f));
 	Normal = mat3(transpose(inverse(model))) * aNormal;

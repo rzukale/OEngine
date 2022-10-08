@@ -2,8 +2,8 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 
-unsigned int Screen::SCREEN_WIDTH = 800;
-unsigned int Screen::SCREEN_HEIGHT = 600;
+unsigned int Screen::SCREEN_WIDTH = 1280;
+unsigned int Screen::SCREEN_HEIGHT = 720;
 
 Screen::Screen() : m_Window(nullptr) { }
 

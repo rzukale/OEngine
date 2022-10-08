@@ -9,6 +9,10 @@
 #include "Shader.h"
 #include "Texture.h"
 #include "../error.h"
+#include "../algorithms/Bounds.h"
+#include "models/Box.hpp"
+#include "glmemory.hpp"
+
 
 struct Vertex
 {
@@ -23,20 +27,21 @@ typedef struct Vertex Vertex;
 class Mesh
 {
 public:
+
+	BoundingRegion m_BoundingRegion;
 	std::vector<Vertex> m_Vertices;
 	std::vector<unsigned int> m_Indices;
 	std::vector<Texture> m_Textures;
 	aiColor4D m_Diffuse;
 	aiColor4D m_Specular;
 
-	Mesh();
-	Mesh(std::vector<Vertex> Vertices, std::vector<unsigned int> Indices, std::vector<Texture> Textures = {});
-	Mesh(std::vector<Vertex> Vertices, std::vector<unsigned int> Indices, aiColor4D diffuse, aiColor4D specular);
+	Mesh(BoundingRegion Region, std::vector<Vertex> Vertices, std::vector<unsigned int> Indices, std::vector<Texture> Textures = {});
+	Mesh(BoundingRegion Region, std::vector<Vertex> Vertices, std::vector<unsigned int> Indices, aiColor4D diffuse, aiColor4D specular);
 
-	void Render(Shader& shader, bool bDoRender = true);
+	void Render(Shader& shader, glm::vec3 Position, glm::vec3 Size, Box* box, bool bDoRender = true);
 	void Cleanup();
 
-	unsigned int m_VAO;
+	ArrayObject m_VAO;
 	unsigned int m_VBO, m_EBO;
 
 private:

@@ -1,8 +1,9 @@
 #pragma once
 
 #include "../Model.h"
+#include "Box.hpp"
 
-constexpr auto UPPER_BOUND = 100;
+#define UPPER_BOUND 100
 
 template <class T>
 class ModelArray
@@ -14,40 +15,30 @@ public:
 	{
 		m_Model.Init();
 
-		// generate m_PositionVBO
-		GLCall(glGenBuffers(1, &m_PositionVBO));
-		GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_PositionVBO));
-		GLCall(glBufferData(GL_ARRAY_BUFFER, UPPER_BOUND * 3 * sizeof(float), NULL, GL_DYNAMIC_DRAW));
-		GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+		m_PositionVBO = BufferObject(GL_ARRAY_BUFFER);
+		m_PositionVBO.Generate();
+		m_PositionVBO.Bind();
+		m_PositionVBO.SetData<glm::vec3>(UPPER_BOUND, NULL, GL_DYNAMIC_DRAW);
 
-		// generate m_SizeVBO
-		GLCall(glGenBuffers(1, &m_SizeVBO));
-		GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_SizeVBO));
-		GLCall(glBufferData(GL_ARRAY_BUFFER, UPPER_BOUND * 3 * sizeof(float), NULL, GL_DYNAMIC_DRAW));
-		GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+		m_SizeVBO = BufferObject(GL_ARRAY_BUFFER);
+		m_SizeVBO.Generate();
+		m_SizeVBO.Bind();
+		m_SizeVBO.SetData<glm::vec3>(UPPER_BOUND, nullptr, GL_DYNAMIC_DRAW);
 
 		// set attribute pointer for each mesh
-		for (unsigned int i = 0, size = m_Model.m_Meshes.size(); i < size; i++)
+		for (unsigned int i = 0, size = (unsigned int)m_Model.m_Meshes.size(); i < size; i++)
 		{
-			GLCall(glBindVertexArray(m_Model.m_Meshes[i].m_VAO));
-			// Positions
-			GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_PositionVBO));
-			GLCall(glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0));
-			GLCall(glEnableVertexAttribArray(3));
-			// Sizes
-			GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_SizeVBO));
-			GLCall(glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0));
-			GLCall(glEnableVertexAttribArray(4));
+			m_Model.m_Meshes[i].m_VAO.Bind();
+			m_PositionVBO.Bind();
+			m_PositionVBO.SetAttribPointer<glm::vec3>(3, 3, GL_FLOAT, 1, 0, 1);
 
-			GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+			m_SizeVBO.Bind();
+			m_SizeVBO.SetAttribPointer<glm::vec3>(4, 3, GL_FLOAT, 1, 0, 1);
 
-			GLCall(glVertexAttribDivisor(3, 1)); // reset 3rd attribute every 1 instance
-			GLCall(glVertexAttribDivisor(4, 1)); // reset 4th attribute every 1 instance
-
-			GLCall(glBindVertexArray(0));
+			ArrayObject::Unbind();
 		}
 	}
-	void Render(Shader& shader, float DeltaTime, bool bSetList = true)
+	void Render(Shader& shader, float DeltaTime, Box* box, bool bSetList = true)
 	{
 		if (bSetList)
 		{
@@ -63,27 +54,30 @@ public:
 		}
 
 		shader.SetMat4("model", glm::mat4(1.0f));
-		m_Model.Render(shader, DeltaTime, false, false);
+		m_Model.Render(shader, DeltaTime, nullptr, false, false);
 
-		int size = std::min(UPPER_BOUND, (int)m_Positions.size()); // if more than 100 instances, only render 100
-		// update data
-		if (m_Positions.empty() == false)
+		unsigned int instances = std::min(UPPER_BOUND, (int)m_Positions.size());
+		if (instances != 0)
 		{
-			GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_PositionVBO));
-			GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, size * 3 * sizeof(float), &m_Positions[0]));
-			
-			GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_SizeVBO));
-			GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, size * 3 * sizeof(float), &m_Sizes[0]));
+			m_PositionVBO.Bind();
+			m_PositionVBO.UpdateData<glm::vec3>(0, instances, &m_Positions[0]);
 
-			GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+			m_SizeVBO.Bind();
+			m_SizeVBO.UpdateData<glm::vec3>(0, instances, &m_Sizes[0]);
+
+			m_SizeVBO.Unbind();
 		}
 
 		// render instanced data
-		for (unsigned int i = 0, length = m_Model.m_Meshes.size(); i < length; i++)
+		for (unsigned int i = 0, length = (unsigned int)m_Model.m_Meshes.size(); i < length; i++)
 		{
-			GLCall(glBindVertexArray(m_Model.m_Meshes[i].m_VAO));
-			GLCall(glDrawElementsInstanced(GL_TRIANGLES, m_Model.m_Meshes[i].m_Indices.size(), GL_UNSIGNED_INT, 0, size));
-			GLCall(glBindVertexArray(0));
+			for (unsigned int j = 0; j < instances; j++)
+			{
+				box->AddInstance(m_Model.m_Meshes[i].m_BoundingRegion, m_Positions[j], m_Sizes[j]);
+			}
+			m_Model.m_Meshes[i].m_VAO.Bind();
+			m_Model.m_Meshes[i].m_VAO.Draw(GL_TRIANGLES, (GLuint)m_Model.m_Meshes[i].m_Indices.size(), GL_UNSIGNED_INT, 0, instances);
+			ArrayObject::Unbind();
 		}
 	}
 	void SetSize(glm::vec3 Size)
@@ -93,13 +87,15 @@ public:
 	void Cleanup()
 	{
 		m_Model.Cleanup();
+		m_PositionVBO.Cleanup();
+		m_SizeVBO.Cleanup();
 	}
 
 protected:
 	T m_Model;
 
-	unsigned int m_PositionVBO;
-	unsigned int m_SizeVBO;
+	BufferObject m_PositionVBO;
+	BufferObject m_SizeVBO;
 	std::vector<glm::vec3> m_Positions;
 	std::vector<glm::vec3> m_Sizes;
 

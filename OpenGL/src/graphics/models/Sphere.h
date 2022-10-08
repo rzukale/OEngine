@@ -7,7 +7,7 @@ class Sphere : public Model
 {
 public:
 
-	Sphere(glm::vec3 Position = glm::vec3(0.0f), glm::vec3 Size = glm::vec3(0.025f)) : Model(Position, Size, false) {}
+	Sphere(glm::vec3 Position = glm::vec3(0.0f), glm::vec3 Size = glm::vec3(0.025f)) : Model(BoundTypes::SPHERE, Position, Size, false) {}
 
 	void Init();
 };

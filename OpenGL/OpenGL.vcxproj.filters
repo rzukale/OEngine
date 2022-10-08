@@ -72,16 +72,19 @@
     <ClCompile Include="src\physics\Global.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\algorithms\Bounds.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\object.vs" />
     <None Include="assets\object.fs" />
     <None Include="assets\lamp.fs" />
-    <None Include="assets\models\lotr_troll\scene.gltf" />
-    <None Include="assets\models\m4a1\scene.gltf" />
     <None Include="assimp-vc143-mtd.dll" />
     <None Include="glfw3.dll" />
-    <None Include="assets\models\sphere\scene.gltf" />
     <None Include="assets\instanced\instanced.vs" />
     <None Include="assets\instanced\box.vs" />
     <None Include="assets\instanced\box.fs" />
@@ -139,6 +142,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\graphics\models\Box.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\algorithms\Bounds.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\glmemory.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\algorithms\States.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

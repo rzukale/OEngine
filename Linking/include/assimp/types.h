@@ -358,7 +358,7 @@ struct aiString {
         if (!len) {
             return;
         }
-        if (length + len >= MAXLEN) {
+        if (length + len >= (ai_uint32)MAXLEN) {
             return;
         }
 

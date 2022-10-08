@@ -14,20 +14,23 @@
 
 #include "Mesh.h"
 #include "../physics/RigidBody.h"
+#include "../algorithms/Bounds.h"
+#include "models/Box.hpp"
 
 class Model
 {
 public:
+	BoundTypes m_BoundType;
 	RigidBody m_RigidBody;
 	glm::vec3 m_Size;
 	std::vector<Mesh> m_Meshes;
 
-	Model(glm::vec3 Position = glm::vec3(0.0f), glm::vec3 Size = glm::vec3(1.0f), bool bHasTextures = true);
+	Model(BoundTypes BoundType = BoundTypes::AABB, glm::vec3 Position = glm::vec3(0.0f), glm::vec3 Size = glm::vec3(1.0f), bool bHasTextures = true);
 
 	virtual void Init();
 	void LoadModel(const std::string& filePath);
 
-	void Render(Shader& shader, float DeltaTime, bool bSetModel = true, bool bDoRender = true);
+	void Render(Shader& shader, float DeltaTime, Box* box, bool bSetModel = true, bool bDoRender = true);
 	void Cleanup();
 protected:
 	bool m_bHasTextures;

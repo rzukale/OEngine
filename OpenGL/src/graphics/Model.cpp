@@ -1,15 +1,15 @@
 #include "Model.h"
 #include "../physics/Global.h"
 
-Model::Model(glm::vec3 Position, glm::vec3 Size, bool bHasTextures)
-	: m_Size(Size), m_bHasTextures(bHasTextures)
+Model::Model(BoundTypes BoundType, glm::vec3 Position, glm::vec3 Size, bool bHasTextures)
+	: m_BoundType(BoundType), m_Size(Size), m_bHasTextures(bHasTextures)
 {
 	m_RigidBody.m_Position = Position;
 }
 
 void Model::Init() { }
 
-void Model::Render(Shader& shader, float DeltaTime, bool bSetModel, bool bDoRender)
+void Model::Render(Shader& shader, float DeltaTime, Box* box, bool bSetModel, bool bDoRender)
 {
 	m_RigidBody.Update(DeltaTime);
 	if (bSetModel)
@@ -23,7 +23,7 @@ void Model::Render(Shader& shader, float DeltaTime, bool bSetModel, bool bDoRend
 
 	for (Mesh& mesh : m_Meshes)
 	{
-		mesh.Render(shader, bDoRender);
+		mesh.Render(shader, m_RigidBody.m_Position, m_Size, box, bDoRender);
 	}
 }
 
@@ -72,6 +72,11 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 	std::vector<unsigned int> indices;
 	std::vector<Texture> textures;
 
+	BoundingRegion BoundRegion(m_BoundType);
+	glm::vec3 min(FLT_MAX);
+	glm::vec3 max(FLT_MIN);
+
+
 	// vertices
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 	{
@@ -84,6 +89,18 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 			mesh->mVertices[i].y,
 			mesh->mVertices[i].z
 		);
+
+		for (int j = 0; j < 3; j++)
+		{
+			if (vertex.m_Position[j] < min[j])
+			{
+				min[j] = vertex.m_Position[j];
+			}
+			if (vertex.m_Position[j] > max[j])
+			{
+				max[j] = vertex.m_Position[j];
+			}
+		}
 
 		// normal
 		vertex.m_Normal = glm::vec3
@@ -107,6 +124,33 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 			vertex.m_TexCoord = glm::vec2(0.0f);
 		}
 		vertices.push_back(vertex);
+	}
+
+	// process min/max for bounding region
+	if (m_BoundType == BoundTypes::AABB)
+	{
+		BoundRegion.m_Min = min;
+		BoundRegion.m_Max = max;
+	}
+	else
+	{
+		// calculate max distance from the center
+		BoundRegion.m_Center = BoundingRegion(min, max).CalculateCenter();
+		float MaxRadiusSquared = 0.0f;
+
+		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+		{
+			float RadiusSquared = 0.0f;
+			for (int j = 0; j < 3; j++)
+			{
+				RadiusSquared += (vertices[i].m_Position[j] - BoundRegion.m_Center[j]) * (vertices[i].m_Position[j] - BoundRegion.m_Center[j]);
+			}
+			if (RadiusSquared > MaxRadiusSquared)
+			{
+				MaxRadiusSquared = RadiusSquared;
+			}
+		}
+		BoundRegion.m_Radius = sqrt(MaxRadiusSquared);
 	}
 
 	// process indices
@@ -135,7 +179,7 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 			aiColor4D spec(1.0f);
 			aiGetMaterialColor(material, AI_MATKEY_COLOR_SPECULAR, &spec);
 
-			return Mesh(vertices, indices, diff, spec);
+			return Mesh(BoundRegion, vertices, indices, diff, spec);
 		}
 
 		// diffuse maps
@@ -146,7 +190,7 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		std::vector<Texture> specularMaps = LoadTextures(material, aiTextureType_SPECULAR);
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 	}
-	return Mesh(vertices, indices, textures);
+	return Mesh(BoundRegion, vertices, indices, textures);
 }
 
 std::vector<Texture> Model::LoadTextures(aiMaterial* material, aiTextureType type)

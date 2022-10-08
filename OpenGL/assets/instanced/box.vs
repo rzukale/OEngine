@@ -10,7 +10,7 @@ uniform mat4 projection;
 
 void main()
 {
-	vec3 Pos = vec3(aPos.x * aSize.x, aPos.y * aSize.y, aPos.z * aSize.z);
+	vec3 Pos = aPos * aSize;
 
 	gl_Position = projection * view * model * vec4(Pos + aOffset, 1.0f);
 }

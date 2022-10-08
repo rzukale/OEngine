@@ -137,6 +137,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Scene.cpp" />
+    <ClCompile Include="src\algorithms\Bounds.cpp" />
     <ClCompile Include="src\graphics\models\Sphere.cpp" />
     <ClCompile Include="src\error.cpp" />
     <ClCompile Include="src\graphics\Light.cpp" />
@@ -161,9 +163,6 @@
     <None Include="assets\instanced\box.vs" />
     <None Include="assets\instanced\instanced.vs" />
     <None Include="assets\instanced\box.fs" />
-    <None Include="assets\models\lotr_troll\scene.gltf" />
-    <None Include="assets\models\m4a1\scene.gltf" />
-    <None Include="assets\models\sphere\scene.gltf" />
     <None Include="assets\object.fs" />
     <None Include="assets\object.vs" />
     <None Include="assets\lamp.fs" />
@@ -171,6 +170,10 @@
     <None Include="glfw3.dll" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Scene.h" />
+    <ClInclude Include="src\algorithms\Bounds.h" />
+    <ClInclude Include="src\algorithms\States.hpp" />
+    <ClInclude Include="src\graphics\glmemory.hpp" />
     <ClInclude Include="src\graphics\models\Box.hpp" />
     <ClInclude Include="src\graphics\models\Sphere.h" />
     <ClInclude Include="src\graphics\models\ModelArray.hpp" />

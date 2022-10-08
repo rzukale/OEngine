@@ -3,7 +3,7 @@
 
 
 Cube::Cube(glm::vec3 Position, glm::vec3 Size)
-    : Model(Position, Size)
+    : Model(BoundTypes::AABB, Position, Size)
 {
 }
 
@@ -71,5 +71,7 @@ void Cube::Init()
 	//Texture tex1("assets/textures", "fallout.png");
 	//tex1.Load();
 
-	m_Meshes.push_back(Mesh(Vertex::GenList(Vertices, NumberOfVertices), Indices));
+    BoundingRegion Region(glm::vec3(-0.5f), glm::vec3(0.5f));
+
+	m_Meshes.push_back(Mesh(Region, Vertex::GenList(Vertices, NumberOfVertices), Indices));
 }

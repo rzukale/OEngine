@@ -14,9 +14,9 @@ Lamp::~Lamp()
 {
 }
 
-void Lamp::Render(Shader& shader, float DeltaTime, bool bSetModel, bool bDoRender)
+void Lamp::Render(Shader& shader, float DeltaTime, Box* box, bool bSetModel, bool bDoRender)
 {
 	shader.Set3Float("LightColor", m_LightColor);
 
-	Cube::Render(shader, DeltaTime, bSetModel, bDoRender);
+	Cube::Render(shader, DeltaTime, box, bSetModel, bDoRender);
 }

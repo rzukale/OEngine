@@ -31,23 +31,19 @@ std::vector<Vertex> Vertex::GenList(float* Vertices, int NumberOfVertices)
 	return Ret;
 }
 
-Mesh::Mesh()
-{
-}
-
-Mesh::Mesh(std::vector<Vertex> Vertices, std::vector<unsigned int> Indices, std::vector<Texture> Textures)
-	: m_Vertices(Vertices), m_Indices(Indices), m_Textures(Textures), m_bNoTextures(false)
+Mesh::Mesh(BoundingRegion Region, std::vector<Vertex> Vertices, std::vector<unsigned int> Indices, std::vector<Texture> Textures)
+	: m_BoundingRegion(Region), m_Vertices(Vertices), m_Indices(Indices), m_Textures(Textures), m_bNoTextures(false)
 {
 	Setup();
 }
 
-Mesh::Mesh(std::vector<Vertex> Vertices, std::vector<unsigned int> Indices, aiColor4D diffuse, aiColor4D specular)
-	: m_Vertices(Vertices), m_Indices(Indices), m_Diffuse(diffuse), m_Specular(specular), m_bNoTextures(true)
+Mesh::Mesh(BoundingRegion Region, std::vector<Vertex> Vertices, std::vector<unsigned int> Indices, aiColor4D diffuse, aiColor4D specular)
+	: m_BoundingRegion(Region), m_Vertices(Vertices), m_Indices(Indices), m_Diffuse(diffuse), m_Specular(specular), m_bNoTextures(true)
 {
 	Setup();
 }
 
-void Mesh::Render(Shader& shader, bool bDoRender)
+void Mesh::Render(Shader& shader, glm::vec3 Position, glm::vec3 Size, Box* box, bool bDoRender)
 {
 	if (m_bNoTextures)
 	{
@@ -82,45 +78,38 @@ void Mesh::Render(Shader& shader, bool bDoRender)
 	}
 	if (bDoRender)
 	{
-		GLCall(glBindVertexArray(m_VAO));
-		GLCall(glDrawElements(GL_TRIANGLES, m_Indices.size(), GL_UNSIGNED_INT, 0));
-		GLCall(glBindVertexArray(0));
-		GLCall(glActiveTexture(GL_TEXTURE0));
-	}
-}
+		box->AddInstance(m_BoundingRegion, Position, Size);
 
-void Mesh::Cleanup()
-{
-	GLCall(glDeleteVertexArrays(1, &m_VAO));
-	GLCall(glDeleteBuffers(1, &m_VBO));
-	GLCall(glDeleteBuffers(1, &m_EBO));
+		m_VAO.Bind();
+		m_VAO.Draw(GL_TRIANGLES, (GLuint)m_Indices.size(), GL_UNSIGNED_INT, 0);
+		ArrayObject::Unbind();
+	}
 }
 
 void Mesh::Setup()
 {
-	GLCall(glGenVertexArrays(1, &m_VAO));
-	GLCall(glGenBuffers(1, &m_VBO));
-	GLCall(glGenBuffers(1, &m_EBO));
+	m_VAO.Generate();
+	m_VAO.Bind();
 
-	GLCall(glBindVertexArray(m_VAO));
+	m_VAO["EBO"] = BufferObject(GL_ELEMENT_ARRAY_BUFFER);
+	m_VAO["EBO"].Generate();
+	m_VAO["EBO"].Bind();
+	m_VAO["EBO"].SetData<GLuint>((GLuint)m_Indices.size(), &m_Indices[0], GL_STATIC_DRAW);
 
-	GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_VBO));
-	GLCall(glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(Vertex), &m_Vertices[0], GL_STATIC_DRAW));
+	m_VAO["VBO"] = BufferObject(GL_ARRAY_BUFFER);
+	m_VAO["VBO"].Generate();
+	m_VAO["VBO"].Bind();
+	m_VAO["VBO"].SetData<Vertex>((GLuint)m_Vertices.size(), &m_Vertices[0], GL_STATIC_DRAW);
 
-	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO));
-	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(unsigned int), &m_Indices[0], GL_STATIC_DRAW));
+	m_VAO["VBO"].SetAttribPointer<GLfloat>(0, 3, GL_FLOAT, 8, 0);
+	m_VAO["VBO"].SetAttribPointer<GLfloat>(1, 3, GL_FLOAT, 8, 3);
+	m_VAO["VBO"].SetAttribPointer<GLfloat>(2, 2, GL_FLOAT, 8, 6);
 
-	// Setting Vertex Attribute pointers
-	// Vertex Position
-	GLCall(glEnableVertexAttribArray(0));
-	GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_Position)));
+	m_VAO["VBO"].Unbind();
+	ArrayObject::Unbind();
+}
 
-	GLCall(glEnableVertexAttribArray(1));
-	GLCall(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_Normal)));
-
-	// Vertex TexCoords
-	GLCall(glEnableVertexAttribArray(2));
-	GLCall(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_TexCoord)));
-
-	GLCall(glBindVertexArray(0));
+void Mesh::Cleanup()
+{
+	m_VAO.Cleanup();
 }

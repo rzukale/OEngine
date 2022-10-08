@@ -28,7 +28,7 @@ public:
 	float m_Speed;
 	float m_Zoom;
 
-	CameraClass(glm::vec3 Position);
+	CameraClass(glm::vec3 Position = glm::vec3(0.0f));
 
 	void UpdateCameraDirection(const float& DeltaX, const float& DeltaY);
 	void UpdateCameraPosition(CameraDirection Direction, const float& DeltaTime);
